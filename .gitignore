@@ -4,6 +4,13 @@
 # Log files
 *.log
 logs/
+**/logs/
+**/application.log
+**/error.log
+**/debug.log
+**/info.log
+**/warn.log
+**/trace.log
 
 # BlueJ files
 *.ctxt

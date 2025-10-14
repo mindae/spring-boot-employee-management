@@ -6,7 +6,7 @@ Write-Host ""
 
 # Build the Docker image
 Write-Host "Building Docker image..." -ForegroundColor Cyan
-docker build -t hello-world-app:latest .
+docker build -t spring-boot-employee-management:latest .
 
 if ($LASTEXITCODE -ne 0) {
     Write-Host "❌ Docker build failed!" -ForegroundColor Red
@@ -17,20 +17,20 @@ Write-Host "✅ Docker image built successfully!" -ForegroundColor Green
 
 # Stop any existing container
 Write-Host "Stopping any existing container..." -ForegroundColor Cyan
-docker stop hello-world-app 2>$null
-docker rm hello-world-app 2>$null
+docker stop spring-boot-employee-management 2>$null
+docker rm spring-boot-employee-management 2>$null
 
 # Run the container
 Write-Host "Starting Spring Boot application..." -ForegroundColor Cyan
 docker run -d `
-    --name hello-world-app `
+    --name spring-boot-employee-management `
     --network host `
     -e SPRING_PROFILES_ACTIVE=docker `
     -e SPRING_DATASOURCE_URL="jdbc:oracle:thin:@localhost:1521/XEPDB1" `
     -e SPRING_DATASOURCE_USERNAME="hr" `
     -e SPRING_DATASOURCE_PASSWORD="hr" `
     -v "${PWD}/logs:/app/logs" `
-    hello-world-app:latest
+    spring-boot-employee-management:latest
 
 if ($LASTEXITCODE -eq 0) {
     Write-Host "✅ Spring Boot application started successfully!" -ForegroundColor Green

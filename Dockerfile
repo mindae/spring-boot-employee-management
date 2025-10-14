@@ -31,4 +31,4 @@ ENV JAVA_OPTS="-Xmx512m -Xms256m"
 ENV SPRING_PROFILES_ACTIVE=docker
 
 # Run the application
-CMD ["sh", "-c", "java $JAVA_OPTS -jar target/hello-world-0.0.1-SNAPSHOT.jar"]
+CMD ["sh", "-c", "java $JAVA_OPTS -jar target/spring-boot-employee-management-1.0.0.jar"]
