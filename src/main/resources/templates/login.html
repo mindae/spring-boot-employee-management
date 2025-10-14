@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <title>welcome to employee management system</title>
+    
+    <!-- External CSS -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/login.css}"/>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <h1 class="title">welcome to employee management system</h1>
+    </div>
+    <div class="content">
+        <div th:if="${param.error}" class="error">Invalid username or password.</div>
+        <form th:action="@{/login}" method="post">
+            <div class="field">
+                <label for="username">Username</label>
+                <input id="username" name="username" type="text" autocomplete="username" required/>
+            </div>
+            <div class="field">
+                <label for="password">Password</label>
+                <input id="password" name="password" type="password" autocomplete="current-password" required/>
+            </div>
+            <div class="field">
+                <button class="btn" type="submit">Sign in</button>
+            </div>
+        </form>
+        <p class="note">Use your configured Spring Security credentials.</p>
+    </div>
+</div>
+
+<!-- External JavaScript -->
+<script th:src="@{/js/login.js}"></script>
+</body>
+</html>
+
+
