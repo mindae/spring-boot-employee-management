@@ -1,9 +1,9 @@
 # 🚀 Spring Boot Employee Management System
 
-[![CI/CD Pipeline](https://github.com/mindae/spring-boot-employee-management/actions/workflows/ci.yml/badge.svg?branch=master)](https://github.com/mindae/spring-boot-employee-management/actions/workflows/ci.yml)
-[![Docker Build](https://github.com/mindae/spring-boot-employee-management/actions/workflows/docker-build.yml/badge.svg?branch=master)](https://github.com/mindae/spring-boot-employee-management/actions/workflows/docker-build.yml)
-[![Security Scan](https://github.com/mindae/spring-boot-employee-management/actions/workflows/security.yml/badge.svg?branch=master)](https://github.com/mindae/spring-boot-employee-management/actions/workflows/security.yml)
-[![Release](https://github.com/mindae/spring-boot-employee-management/actions/workflows/release.yml/badge.svg?branch=master)](https://github.com/mindae/spring-boot-employee-management/actions/workflows/release.yml)
+[![CI/CD Pipeline](https://img.shields.io/github/actions/workflow/status/mindae/spring-boot-employee-management/ci.yml?branch=master&label=CI/CD%20Pipeline)](https://github.com/mindae/spring-boot-employee-management/actions/workflows/ci.yml)
+[![Docker Build](https://img.shields.io/github/actions/workflow/status/mindae/spring-boot-employee-management/docker-build.yml?branch=master&label=Docker%20Build)](https://github.com/mindae/spring-boot-employee-management/actions/workflows/docker-build.yml)
+[![Security Scan](https://img.shields.io/github/actions/workflow/status/mindae/spring-boot-employee-management/security.yml?branch=master&label=Security%20Scan)](https://github.com/mindae/spring-boot-employee-management/actions/workflows/security.yml)
+[![Release](https://img.shields.io/github/actions/workflow/status/mindae/spring-boot-employee-management/release.yml?branch=master&label=Release)](https://github.com/mindae/spring-boot-employee-management/actions/workflows/release.yml)
 [![codecov](https://codecov.io/gh/mindae/spring-boot-employee-management/branch/master/graph/badge.svg)](https://codecov.io/gh/mindae/spring-boot-employee-management)
 [![Java](https://img.shields.io/badge/Java-17-orange.svg)](https://openjdk.java.net/projects/jdk/17/)
 [![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.3.4-brightgreen.svg)](https://spring.io/projects/spring-boot)
