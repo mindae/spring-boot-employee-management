@@ -1,0 +1,20 @@
+name: Disable Email Notifications
+
+on:
+  workflow_dispatch:
+
+jobs:
+  disable-notifications:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Disable GitHub email notifications
+      run: |
+        echo "This workflow helps disable email notifications for this demo repository"
+        echo "To disable email notifications:"
+        echo "1. Go to GitHub Settings > Notifications"
+        echo "2. Uncheck 'Email' for repository notifications"
+        echo "3. Or go to this repository's Settings > Notifications"
+        echo "4. Disable email notifications for this specific repository"
+        echo ""
+        echo "This is a demo project and doesn't need email notifications"

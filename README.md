@@ -205,8 +205,8 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 👨‍💻 Author
 
-**Mahendra Chaurasia**
-- Email: mahendrachaurasia@gmail.com
+**Demo Project Maintainer**
+- Email: johndoe@example.com
 - GitHub: [@mindae](https://github.com/mindae)
 
 ## 🙏 Acknowledgments

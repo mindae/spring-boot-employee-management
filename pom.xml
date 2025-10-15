@@ -13,7 +13,7 @@
   <artifactId>spring-boot-employee-management</artifactId>
   <version>1.0.0</version>
   <name>spring-boot-employee-management</name>
-  <description>Comprehensive Spring Boot Employee Management System with Docker support</description>
+  <description>Demo Spring Boot Employee Management System with Docker support</description>
 
   <properties>
     <java.version>17</java.version>
