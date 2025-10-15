@@ -1,0 +1,154 @@
+@startuml Employee Management System - Class Diagram
+
+!theme plain
+skinparam classAttributeIconSize 0
+
+package "com.example.hello.model" {
+    class User {
+        -Long id
+        -String username
+        -String password
+        -Boolean enabled
+        -LocalDateTime createdDate
+        -LocalDateTime updatedDate
+        -Set<Authority> authorities
+        +User()
+        +User(username, password, enabled)
+        +getId() : Long
+        +setId(id)
+        +getUsername() : String
+        +setUsername(username)
+        +getPassword() : String
+        +setPassword(password)
+        +getEnabled() : Boolean
+        +setEnabled(enabled)
+        +getAuthorities() : Set<Authority>
+        +setAuthorities(authorities)
+        +getCreatedDate() : LocalDateTime
+        +setCreatedDate(createdDate)
+        +getUpdatedDate() : LocalDateTime
+        +setUpdatedDate(updatedDate)
+    }
+
+    class Authority {
+        -Long id
+        -String username
+        -String authority
+        -LocalDateTime createdDate
+        -User user
+        +Authority()
+        +Authority(username, authority)
+        +getId() : Long
+        +setId(id)
+        +getUsername() : String
+        +setUsername(username)
+        +getAuthority() : String
+        +setAuthority(authority)
+        +getCreatedDate() : LocalDateTime
+        +setCreatedDate(createdDate)
+        +getUser() : User
+        +setUser(user)
+    }
+
+    class Employee {
+        -Long id
+        -String firstName
+        -String lastName
+        -String email
+        -String phoneNumber
+        -LocalDate hireDate
+        -String jobId
+        -BigDecimal salary
+        -BigDecimal commissionPct
+        -Long managerId
+        -Long departmentId
+        +getId() : Long
+        +setId(id)
+        +getFirstName() : String
+        +setFirstName(firstName)
+        +getLastName() : String
+        +setLastName(lastName)
+        +getEmail() : String
+        +setEmail(email)
+        +getPhoneNumber() : String
+        +setPhoneNumber(phoneNumber)
+        +getHireDate() : LocalDate
+        +setHireDate(hireDate)
+        +getJobId() : String
+        +setJobId(jobId)
+        +getSalary() : BigDecimal
+        +setSalary(salary)
+        +getCommissionPct() : BigDecimal
+        +setCommissionPct(commissionPct)
+        +getManagerId() : Long
+        +setManagerId(managerId)
+        +getDepartmentId() : Long
+        +setDepartmentId(departmentId)
+    }
+}
+
+package "com.example.hello.repository" {
+    interface UserRepository {
+        +findByUsername(username) : Optional<User>
+    }
+
+    interface EmployeeRepository {
+        +findAll() : List<Employee>
+        +findById(id) : Optional<Employee>
+        +save(employee) : Employee
+        +deleteById(id) : void
+        +existsById(id) : boolean
+    }
+}
+
+package "com.example.hello.service" {
+    class EmployeeService {
+        -EmployeeRepository employeeRepository
+        +EmployeeService(employeeRepository)
+        +listAll() : List<Employee>
+        +getById(id) : Optional<Employee>
+        +create(employee) : Employee
+        +update(id, update) : Optional<Employee>
+        +delete(id) : boolean
+    }
+}
+
+package "com.example.hello.controller" {
+    class LoginController {
+        +login(request, model) : String
+    }
+
+    class EmployeeController {
+        -EmployeeService employeeService
+        +EmployeeController(employeeService)
+        +list() : List<Employee>
+        +get(id) : ResponseEntity<Employee>
+        +create(employee) : ResponseEntity<Employee>
+        +update(id, update) : ResponseEntity<Employee>
+        +delete(id) : ResponseEntity<Void>
+    }
+}
+
+package "com.example.hello.config" {
+    class SecurityConfig {
+        -UserDetailsService userDetailsService
+        +SecurityConfig(userDetailsService)
+        +authenticationManager(config) : AuthenticationManager
+        +securityFilterChain(http) : SecurityFilterChain
+    }
+}
+
+' Relationships
+User ||--o{ Authority : "has"
+UserRepository ||-- User : "manages"
+EmployeeRepository ||-- Employee : "manages"
+EmployeeService ||-- EmployeeRepository : "uses"
+EmployeeController ||-- EmployeeService : "uses"
+LoginController ||-- User : "authenticates"
+SecurityConfig ||-- UserDetailsService : "configures"
+
+' JPA Annotations
+User ||--|| Authority : "OneToMany"
+Authority }o--|| User : "ManyToOne"
+
+@enduml

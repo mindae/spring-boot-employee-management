@@ -1,0 +1,176 @@
+@startuml Employee Management System - Authentication Process Activity Diagram
+
+!theme plain
+skinparam activity {
+    BackgroundColor LightCoral
+    BorderColor DarkRed
+}
+skinparam activityDiamond {
+    BackgroundColor LightYellow
+    BorderColor DarkOrange
+}
+
+start
+
+:User attempts to access protected resource;
+
+if (Request type?) then (Web Interface)
+    :Redirect to login page;
+    :Display login form;
+    :User enters credentials;
+    :Submit form with CSRF token;
+    
+    :Extract username and password;
+    :Validate CSRF token;
+    
+    if (CSRF token valid?) then (No)
+        :Return 403 Forbidden;
+        :Display CSRF error;
+        stop
+    else (Yes)
+        :Continue with authentication;
+    endif
+
+else (API Request)
+    :Extract Basic Auth header;
+    :Decode Base64 credentials;
+    :Extract username and password;
+endif
+
+:Query database for user;
+:Load user by username;
+
+if (User found?) then (No)
+    :Log failed login attempt;
+    note right
+      Security logging:
+      - Username attempted
+      - Timestamp
+      - IP address
+      - User agent
+    end note
+    
+    if (Request type?) then (Web Interface)
+        :Redirect to /login?error;
+        :Display "Invalid credentials" message;
+    else (API Request)
+        :Return 401 Unauthorized;
+        :Include WWW-Authenticate header;
+    endif
+    stop
+else (Yes)
+    :Check if user is enabled;
+    
+    if (User enabled?) then (No)
+        :Log disabled user login attempt;
+        
+        if (Request type?) then (Web Interface)
+            :Redirect to /login?error;
+            :Display "Account disabled" message;
+        else (API Request)
+            :Return 401 Unauthorized;
+        endif
+        stop
+    else (Yes)
+        :Load user authorities;
+        :Verify password using BCrypt;
+        
+        if (Password valid?) then (No)
+            :Increment failed login attempts;
+            :Log failed login attempt;
+            
+            if (Failed attempts > threshold?) then (Yes)
+                :Temporarily lock account;
+                :Log account lockout;
+                note right
+                  Account lockout:
+                  - Lock duration: 15 minutes
+                  - Max attempts: 5
+                  - Automatic unlock
+                end note
+            endif
+            
+            if (Request type?) then (Web Interface)
+                :Redirect to /login?error;
+                :Display "Invalid credentials" message;
+            else (API Request)
+                :Return 401 Unauthorized;
+            endif
+            stop
+        else (Yes)
+            :Reset failed login attempts;
+            :Update last login timestamp;
+            :Log successful login;
+            
+            if (Request type?) then (Web Interface)
+                :Create user session;
+                :Set session attributes;
+                note right
+                  Session attributes:
+                  - User ID
+                  - Username
+                  - Authorities
+                  - Creation time
+                  - Last access time
+                end note
+                
+                :Redirect to default success URL;
+                :Display protected content;
+            else (API Request)
+                :Check required authorities;
+                
+                if (Has required role?) then (Yes)
+                    :Return 200 OK with data;
+                    :Include user info in response;
+                else (No)
+                    :Return 403 Forbidden;
+                    :Display "Insufficient privileges" message;
+                endif
+            endif
+        endif
+    endif
+endif
+
+:Continue with application flow;
+
+if (Session timeout?) then (Yes)
+    :Invalidate session;
+    :Redirect to login page;
+    :Display "Session expired" message;
+    stop
+else (Continue)
+    :Continue with protected operations;
+endif
+
+:User performs operations;
+
+if (Logout requested?) then (Yes)
+    :Invalidate session;
+    :Clear session cookies;
+    :Log logout event;
+    
+    if (Request type?) then (Web Interface)
+        :Redirect to /login?logout;
+        :Display "Logged out successfully" message;
+    else (API Request)
+        :Return 200 OK;
+    endif
+    stop
+else (Continue)
+    :Continue with application;
+endif
+
+stop
+
+note bottom
+  Security Features:
+  - Password encryption (BCrypt)
+  - Account lockout protection
+  - Session management
+  - CSRF protection
+  - Audit logging
+  - Role-based authorization
+  - Failed login tracking
+end note
+
+@enduml

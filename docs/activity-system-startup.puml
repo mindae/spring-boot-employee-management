@@ -1,0 +1,205 @@
+@startuml Employee Management System - System Startup Activity Diagram
+
+!theme plain
+skinparam activity {
+    BackgroundColor LightPurple
+    BorderColor DarkPurple
+}
+skinparam activityDiamond {
+    BackgroundColor LightYellow
+    BorderColor DarkOrange
+}
+
+start
+
+:Application startup initiated;
+
+:Load application properties;
+note right
+  Configuration files:
+  - application.properties
+  - application-docker.properties
+  - logback-spring.xml
+end note
+
+:Initialize Spring Boot context;
+:Load Spring Security configuration;
+:Initialize database connection pool;
+
+:Check database connectivity;
+if (Database accessible?) then (No)
+    :Log database connection error;
+    :Display connection failure message;
+    :Application startup failed;
+    stop
+else (Yes)
+    :Initialize JPA/Hibernate;
+    :Create database tables if needed;
+    :Run database migrations;
+endif
+
+:Initialize security components;
+note right
+  Security initialization:
+  - UserDetailsService
+  - AuthenticationManager
+  - SecurityFilterChain
+  - PasswordEncoder
+end note
+
+:Initialize repositories;
+note right
+  Repository initialization:
+  - UserRepository
+  - EmployeeRepository
+  - AuthorityRepository
+end note
+
+:Initialize services;
+note right
+  Service initialization:
+  - EmployeeService
+  - UserDetailsService
+end note
+
+:Initialize controllers;
+note right
+  Controller initialization:
+  - LoginController
+  - EmployeeController
+  - ExceptionHandlingController
+end note
+
+:Initialize database with default data;
+:Check if default users exist;
+
+if (Default users exist?) then (No)
+    :Create default admin user;
+    note right
+      Default admin user:
+      - Username: admin
+      - Password: admin123
+      - Roles: ROLE_USER, ROLE_ADMIN
+    end note
+    
+    :Create default regular user;
+    note right
+      Default regular user:
+      - Username: user
+      - Password: user123
+      - Role: ROLE_USER
+    end note
+    
+    :Create test user;
+    note right
+      Test user:
+      - Username: bill
+      - Password: bill123
+      - Role: ROLE_USER
+    end note
+    
+    :Log default users created;
+else (Yes)
+    :Skip user creation;
+    :Log existing users found;
+endif
+
+:Initialize logging system;
+note right
+  Logging configuration:
+  - Logback configuration
+  - Log levels
+  - File appenders
+  - Console appenders
+  - Rolling policies
+end note
+
+:Initialize OpenAPI/Swagger;
+note right
+  API documentation:
+  - OpenAPI specification
+  - Swagger UI configuration
+  - Security schemes
+  - API endpoints documentation
+end note
+
+:Initialize exception handling;
+note right
+  Exception handling:
+  - Global exception handler
+  - Custom exception aspects
+  - Error response formatting
+  - Logging configuration
+end note
+
+:Initialize AOP aspects;
+note right
+  AOP aspects:
+  - Logging aspect
+  - Performance aspect
+  - Security aspect
+  - Exception handling aspect
+end note
+
+:Start embedded web server;
+:Configure server port and context;
+
+if (Server started successfully?) then (No)
+    :Log server startup error;
+    :Display server failure message;
+    :Application startup failed;
+    stop
+else (Yes)
+    :Log successful startup;
+    :Display startup banner;
+    note right
+      Startup information:
+      - Application name
+      - Version
+      - Port number
+      - Database connection
+      - Security configuration
+    end note
+endif
+
+:Register shutdown hooks;
+note right
+  Shutdown hooks:
+  - Database connection cleanup
+  - Session cleanup
+  - Log file closure
+  - Resource cleanup
+end note
+
+:Application ready for requests;
+:Log "Application started successfully";
+
+:Wait for incoming requests;
+
+if (Shutdown signal received?) then (Yes)
+    :Begin graceful shutdown;
+    :Stop accepting new requests;
+    :Complete existing requests;
+    :Close database connections;
+    :Clean up resources;
+    :Log shutdown completion;
+    stop
+else (Continue)
+    :Continue processing requests;
+endif
+
+stop
+
+note bottom
+  Startup Features:
+  - Database initialization
+  - Security configuration
+  - Default user creation
+  - Logging setup
+  - API documentation
+  - Exception handling
+  - AOP configuration
+  - Graceful shutdown
+end note
+
+@enduml

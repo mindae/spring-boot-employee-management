@@ -1,0 +1,79 @@
+name: Notify Build Status
+
+on:
+  workflow_run:
+    workflows: ["CI/CD Pipeline", "Security Scan", "Docker Build and Deploy"]
+    types: [completed]
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion != 'skipped' }}
+    
+    steps:
+    - name: Notify build status
+      run: |
+        echo "🔔 Build Notification"
+        echo "===================="
+        echo "Repository: ${{ github.repository }}"
+        echo "Branch: ${{ github.event.workflow_run.head_branch }}"
+        echo "Commit: ${{ github.event.workflow_run.head_sha }}"
+        echo "Workflow: ${{ github.event.workflow_run.name }}"
+        echo "Status: ${{ github.event.workflow_run.conclusion }}"
+        echo "URL: ${{ github.event.workflow_run.html_url }}"
+        
+        if [ "${{ github.event.workflow_run.conclusion }}" == "success" ]; then
+          echo "✅ Build successful! Your code is working fine."
+        elif [ "${{ github.event.workflow_run.conclusion }}" == "failure" ]; then
+          echo "❌ Build failed! Please check the logs for issues."
+        elif [ "${{ github.event.workflow_run.conclusion }}" == "cancelled" ]; then
+          echo "⏹️ Build was cancelled."
+        else
+          echo "⚠️ Build completed with status: ${{ github.event.workflow_run.conclusion }}"
+        fi
+
+  slack-notify:
+    runs-on: ubuntu-latest
+    if: always() && github.event.workflow_run.conclusion != 'skipped'
+    
+    steps:
+    - name: Slack notification
+      if: env.SLACK_WEBHOOK_URL != ''
+      uses: 8398a7/action-slack@v3
+      with:
+        status: ${{ github.event.workflow_run.conclusion }}
+        channel: '#builds'
+        text: |
+          🚀 Build Status: ${{ github.event.workflow_run.conclusion }}
+          📁 Repository: ${{ github.repository }}
+          🌿 Branch: ${{ github.event.workflow_run.head_branch }}
+          🔗 URL: ${{ github.event.workflow_run.html_url }}
+      env:
+        SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+
+  email-notify:
+    runs-on: ubuntu-latest
+    if: always() && github.event.workflow_run.conclusion != 'skipped'
+    
+    steps:
+    - name: Send email notification
+      if: env.EMAIL_SMTP_SERVER != ''
+      uses: dawidd6/action-send-mail@v3
+      with:
+        server_address: ${{ secrets.EMAIL_SMTP_SERVER }}
+        server_port: ${{ secrets.EMAIL_SMTP_PORT }}
+        username: ${{ secrets.EMAIL_USERNAME }}
+        password: ${{ secrets.EMAIL_PASSWORD }}
+        subject: |
+          Build ${{ github.event.workflow_run.conclusion }}: ${{ github.repository }}
+        to: ${{ secrets.EMAIL_TO }}
+        from: ${{ secrets.EMAIL_FROM }}
+        body: |
+          Build Status: ${{ github.event.workflow_run.conclusion }}
+          Repository: ${{ github.repository }}
+          Branch: ${{ github.event.workflow_run.head_branch }}
+          Commit: ${{ github.event.workflow_run.head_sha }}
+          Workflow: ${{ github.event.workflow_run.name }}
+          URL: ${{ github.event.workflow_run.html_url }}
+          
+          ${{ github.event.workflow_run.conclusion == 'success' && '✅ Your code is working fine!' || '❌ Please check the build logs for issues.' }}

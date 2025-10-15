@@ -1,0 +1,206 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    
+    services:
+      oracle:
+        image: gvenzl/oracle-xe:21-slim
+        env:
+          ORACLE_PASSWORD: hr
+          ORACLE_DATABASE: XEPDB1
+        ports:
+          - 1521:1521
+        options: >-
+          --health-cmd "echo 'SELECT 1 FROM DUAL' | sqlplus hr/hr@//localhost:1521/XEPDB1"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up JDK 17
+      uses: actions/setup-java@v4
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+
+    - name: Cache Maven dependencies
+      uses: actions/cache@v3
+      with:
+        path: ~/.m2
+        key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+        restore-keys: ${{ runner.os }}-m2
+
+    - name: Wait for Oracle to be ready
+      run: |
+        echo "Waiting for Oracle database to be ready..."
+        timeout 300 bash -c 'until echo "SELECT 1 FROM DUAL" | sqlplus hr/hr@//localhost:1521/XEPDB1; do sleep 5; done'
+        echo "Oracle database is ready!"
+
+    - name: Run Maven clean compile
+      run: mvn clean compile -DskipTests
+
+    - name: Run Maven tests
+      run: mvn test
+      env:
+        SPRING_DATASOURCE_URL: jdbc:oracle:thin:@localhost:1521/XEPDB1
+        SPRING_DATASOURCE_USERNAME: hr
+        SPRING_DATASOURCE_PASSWORD: hr
+        SPRING_DATASOURCE_DRIVER_CLASS_NAME: oracle.jdbc.OracleDriver
+
+    - name: Run Maven package
+      run: mvn package -DskipTests
+      env:
+        SPRING_DATASOURCE_URL: jdbc:oracle:thin:@localhost:1521/XEPDB1
+        SPRING_DATASOURCE_USERNAME: hr
+        SPRING_DATASOURCE_PASSWORD: hr
+        SPRING_DATASOURCE_DRIVER_CLASS_NAME: oracle.jdbc.OracleDriver
+
+    - name: Upload test results
+      uses: actions/upload-artifact@v3
+      if: always()
+      with:
+        name: test-results
+        path: target/surefire-reports/
+
+    - name: Upload build artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        name: build-artifacts
+        path: target/*.jar
+
+  security-scan:
+    runs-on: ubuntu-latest
+    needs: build-and-test
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up JDK 17
+      uses: actions/setup-java@v4
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+
+    - name: Cache Maven dependencies
+      uses: actions/cache@v3
+      with:
+        path: ~/.m2
+        key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+        restore-keys: ${{ runner.os }}-m2
+
+    - name: Run OWASP Dependency Check
+      run: |
+        mvn org.owasp:dependency-check-maven:check
+      continue-on-error: true
+
+    - name: Upload security scan results
+      uses: actions/upload-artifact@v3
+      if: always()
+      with:
+        name: security-scan-results
+        path: target/dependency-check-report.html
+
+  code-quality:
+    runs-on: ubuntu-latest
+    needs: build-and-test
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up JDK 17
+      uses: actions/setup-java@v4
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+
+    - name: Cache Maven dependencies
+      uses: actions/cache@v3
+      with:
+        path: ~/.m2
+        key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+        restore-keys: ${{ runner.os }}-m2
+
+    - name: Run SpotBugs
+      run: |
+        mvn spotbugs:check
+      continue-on-error: true
+
+    - name: Run Checkstyle
+      run: |
+        mvn checkstyle:check
+      continue-on-error: true
+
+    - name: Upload code quality results
+      uses: actions/upload-artifact@v3
+      if: always()
+      with:
+        name: code-quality-results
+        path: target/
+
+  docker-build:
+    runs-on: ubuntu-latest
+    needs: build-and-test
+    if: github.ref == 'refs/heads/main'
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+
+    - name: Login to Docker Hub
+      uses: docker/login-action@v3
+      with:
+        username: ${{ secrets.DOCKER_USERNAME }}
+        password: ${{ secrets.DOCKER_PASSWORD }}
+
+    - name: Build and push Docker image
+      uses: docker/build-push-action@v5
+      with:
+        context: .
+        push: true
+        tags: |
+          mindae/spring-boot-employee-management:latest
+          mindae/spring-boot-employee-management:${{ github.sha }}
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
+
+  notify:
+    runs-on: ubuntu-latest
+    needs: [build-and-test, security-scan, code-quality]
+    if: always()
+    
+    steps:
+    - name: Notify build status
+      run: |
+        if [ "${{ needs.build-and-test.result }}" == "success" ]; then
+          echo "✅ Build successful!"
+        else
+          echo "❌ Build failed!"
+        fi
+        
+        if [ "${{ needs.security-scan.result }}" == "success" ]; then
+          echo "✅ Security scan passed!"
+        else
+          echo "⚠️ Security scan had issues!"
+        fi
+        
+        if [ "${{ needs.code-quality.result }}" == "success" ]; then
+          echo "✅ Code quality checks passed!"
+        else
+          echo "⚠️ Code quality issues found!"
+        fi

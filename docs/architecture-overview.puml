@@ -1,0 +1,95 @@
+@startuml Employee Management System - Architecture Overview
+
+!theme plain
+skinparam rectangle {
+    BackgroundColor LightYellow
+    BorderColor DarkOrange
+}
+
+package "Client Layer" {
+    rectangle "Web Browser" as WebBrowser
+    rectangle "API Client" as APIClient
+    rectangle "Swagger UI" as SwaggerUI
+}
+
+package "Application Layer" {
+    rectangle "Spring Boot Application" as SpringApp {
+        package "Controllers" {
+            [LoginController]
+            [EmployeeController]
+        }
+        package "Services" {
+            [EmployeeService]
+            [UserDetailsService]
+        }
+        package "Repositories" {
+            [UserRepository]
+            [EmployeeRepository]
+        }
+        package "Security" {
+            [SecurityConfig]
+            [AuthenticationManager]
+        }
+    }
+}
+
+package "Database Layer" {
+    rectangle "Oracle Database" as OracleDB {
+        [APP_USERS]
+        [APP_AUTHORITIES]
+        [EMPLOYEES]
+    }
+}
+
+package "Infrastructure Layer" {
+    rectangle "Docker Container" as Docker {
+        [Spring Boot App]
+        [Log Files]
+    }
+    rectangle "Host System" as Host {
+        [Oracle Database Server]
+        [Docker Engine]
+    }
+}
+
+' Client to Application
+WebBrowser --> SpringApp : HTTP/HTTPS
+APIClient --> SpringApp : REST API
+SwaggerUI --> SpringApp : API Documentation
+
+' Application to Database
+SpringApp --> OracleDB : JDBC Connection
+
+' Infrastructure
+Docker --> Host : Container Runtime
+SpringApp --> Docker : Application Deployment
+OracleDB --> Host : Database Server
+
+' Security Flow
+note right of SpringApp
+  Security Features:
+  - HTTP Basic Authentication
+  - Form-based Authentication
+  - CSRF Protection
+  - Session Management
+  - Role-based Authorization
+end note
+
+' Data Flow
+note left of OracleDB
+  Database Schema:
+  - User Management (APP_USERS, APP_AUTHORITIES)
+  - Employee Management (EMPLOYEES)
+  - Foreign Key Relationships
+end note
+
+' Deployment
+note bottom of Docker
+  Container Configuration:
+  - Port: 8080
+  - Environment Variables
+  - Volume Mounts for Logs
+  - Network: host mode
+end note
+
+@enduml

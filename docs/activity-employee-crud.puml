@@ -1,0 +1,192 @@
+@startuml Employee Management System - Employee CRUD Operations Activity Diagram
+
+!theme plain
+skinparam activity {
+    BackgroundColor LightGreen
+    BorderColor DarkGreen
+}
+skinparam activityDiamond {
+    BackgroundColor LightYellow
+    BorderColor DarkOrange
+}
+
+start
+
+:User accesses Employee Management;
+
+if (User authenticated?) then (No)
+    :Redirect to login page;
+    stop
+else (Yes)
+    :Check user authorities;
+    
+    if (Has ROLE_USER or ROLE_ADMIN?) then (No)
+        :Return 403 Forbidden;
+        stop
+    else (Yes)
+        :Display employee management interface;
+    endif
+endif
+
+:User selects operation;
+
+if (Operation type?) then (Create Employee)
+    :Display create employee form;
+    :User fills employee details;
+    note right
+      Required fields:
+      - First Name
+      - Last Name
+      - Email
+      - Job ID
+      - Hire Date
+      - Salary
+    end note
+    
+    :Validate employee data;
+    
+    if (Validation successful?) then (Yes)
+        :Check for duplicate email;
+        
+        if (Email unique?) then (Yes)
+            :Create Employee entity;
+            :Set creation timestamp;
+            :Save to database;
+            
+            if (Save successful?) then (Yes)
+                :Return 201 Created;
+                :Display success message;
+                :Redirect to employee list;
+            else (No)
+                :Return 500 Internal Server Error;
+                :Display error message;
+            endif
+        else (No)
+            :Return 400 Bad Request;
+            :Display email already exists error;
+        endif
+    else (No)
+        :Return 400 Bad Request;
+        :Display validation errors;
+    endif
+
+elseif (Read Employee)
+    :Get employee ID from request;
+    :Query database for employee;
+    
+    if (Employee found?) then (Yes)
+        :Return 200 OK with employee data;
+        :Display employee details;
+    else (No)
+        :Return 404 Not Found;
+        :Display employee not found message;
+    endif
+
+elseif (Update Employee)
+    :Get employee ID from request;
+    :Get updated employee data;
+    :Query database for existing employee;
+    
+    if (Employee exists?) then (Yes)
+        :Validate updated data;
+        
+        if (Validation successful?) then (Yes)
+            :Update employee fields;
+            :Set modification timestamp;
+            :Save to database;
+            
+            if (Save successful?) then (Yes)
+                :Return 200 OK with updated data;
+                :Display success message;
+            else (No)
+                :Return 500 Internal Server Error;
+                :Display error message;
+            endif
+        else (No)
+            :Return 400 Bad Request;
+            :Display validation errors;
+        endif
+    else (No)
+        :Return 404 Not Found;
+        :Display employee not found message;
+    endif
+
+elseif (Delete Employee)
+    :Get employee ID from request;
+    :Query database for employee;
+    
+    if (Employee exists?) then (Yes)
+        :Check for dependencies;
+        note right
+          Check for:
+          - Subordinate employees
+          - Active projects
+          - Pending approvals
+        end note
+        
+        if (Dependencies found?) then (Yes)
+            :Return 409 Conflict;
+            :Display dependency error;
+        else (No)
+            :Delete employee from database;
+            
+            if (Delete successful?) then (Yes)
+                :Return 204 No Content;
+                :Display success message;
+                :Refresh employee list;
+            else (No)
+                :Return 500 Internal Server Error;
+                :Display error message;
+            endif
+        endif
+    else (No)
+        :Return 404 Not Found;
+        :Display employee not found message;
+    endif
+
+elseif (List Employees)
+    :Query database for all employees;
+    :Apply pagination if needed;
+    :Apply filtering if requested;
+    :Apply sorting if requested;
+    :Return 200 OK with employee list;
+    :Display employee list with controls;
+
+elseif (Search Employees)
+    :Get search criteria;
+    :Query database with search filters;
+    :Apply search results pagination;
+    :Return 200 OK with search results;
+    :Display search results;
+
+else (Invalid Operation)
+    :Return 400 Bad Request;
+    :Display invalid operation error;
+endif
+
+:Log operation in audit trail;
+note right
+  Audit information:
+  - User ID
+  - Operation type
+  - Timestamp
+  - Employee ID (if applicable)
+  - Success/failure status
+end note
+
+:Update user session;
+:Return to employee management interface;
+
+stop
+
+note bottom
+  Security Features:
+  - Authentication required
+  - Role-based authorization
+  - Input validation
+  - SQL injection prevention
+  - Audit logging
+  - Transaction management
+end note
+
+@enduml

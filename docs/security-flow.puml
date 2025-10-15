@@ -1,0 +1,67 @@
+@startuml Employee Management System - Security Flow Diagram
+
+!theme plain
+skinparam activity {
+    BackgroundColor LightGreen
+    BorderColor DarkGreen
+}
+
+start
+
+:User accesses application;
+
+if (Request type?) then (Web Interface)
+    :Navigate to /login;
+    :Display login form;
+    :User enters credentials;
+    :POST /login with form data;
+    :Spring Security validates credentials;
+    if (Authentication successful?) then (Yes)
+        :Create user session;
+        :Redirect to Swagger UI;
+        :Display protected content;
+    else (No)
+        :Redirect to /login?error;
+        :Display error message;
+    endif
+else (API Request)
+    :Client sends API request;
+    :Extract Basic Auth header;
+    :Decode username:password;
+    :Spring Security validates credentials;
+    if (Authentication successful?) then (Yes)
+        :Check user authorities;
+        if (Has required role?) then (Yes)
+            :Process API request;
+            :Return JSON response;
+        else (No)
+            :Return 403 Forbidden;
+        endif
+    else (No)
+        :Return 401 Unauthorized;
+    endif
+endif
+
+:User performs operations;
+
+if (Logout requested?) then (Yes)
+    :POST /logout;
+    :Invalidate session;
+    :Redirect to /login?logout;
+    stop
+else (Continue)
+    :Continue with application;
+endif
+
+stop
+
+note right
+  Security Features:
+  - HTTP Basic Auth for API
+  - Form-based Auth for Web
+  - CSRF Protection
+  - Session Management
+  - Role-based Access Control
+end note
+
+@enduml

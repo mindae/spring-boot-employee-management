@@ -1,0 +1,64 @@
+@startuml Employee Management System - Login Flow Sequence Diagram
+
+!theme plain
+skinparam sequenceArrowThickness 2
+skinparam roundcorner 20
+skinparam maxmessagesize 60
+
+actor "User" as U
+participant "Browser" as B
+participant "LoginController" as LC
+participant "SecurityConfig" as SC
+participant "UserDetailsService" as UDS
+participant "UserRepository" as UR
+participant "Database" as DB
+
+== Login Page Access ==
+U -> B: Navigate to /login
+B -> LC: GET /login
+activate LC
+LC -> LC: Add CSRF token to model
+LC --> B: Return login.html template
+deactivate LC
+B --> U: Display login form
+
+== Form-Based Authentication ==
+U -> B: Enter credentials & submit form
+B -> SC: POST /login (username, password)
+activate SC
+SC -> UDS: loadUserByUsername(username)
+activate UDS
+UDS -> UR: findByUsername(username)
+activate UR
+UR -> DB: SELECT * FROM APP_USERS WHERE USERNAME = ?
+DB --> UR: User data
+deactivate UR
+UR --> UDS: Optional<User>
+UDS -> UR: Load authorities for user
+activate UR
+UR -> DB: SELECT * FROM APP_AUTHORITIES WHERE USERNAME = ?
+DB --> UR: Authority data
+deactivate UR
+UR --> UDS: Set<Authority>
+UDS --> SC: UserDetails with authorities
+deactivate UDS
+SC -> SC: Validate password
+alt Authentication Success
+    SC --> B: Redirect to /swagger-ui/index.html
+    B --> U: Display Swagger UI
+else Authentication Failure
+    SC --> B: Redirect to /login?error
+    B --> U: Display error message
+end
+deactivate SC
+
+== Logout Flow ==
+U -> B: Click logout
+B -> SC: POST /logout
+activate SC
+SC -> SC: Invalidate session
+SC --> B: Redirect to /login?logout
+deactivate SC
+B --> U: Display login form with logout message
+
+@enduml

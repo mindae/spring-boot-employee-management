@@ -43,6 +43,18 @@
       <scope>runtime</scope>
     </dependency>
 
+    <!-- Flyway for database migrations -->
+    <dependency>
+      <groupId>org.flywaydb</groupId>
+      <artifactId>flyway-core</artifactId>
+    </dependency>
+    
+    <!-- Flyway Oracle support -->
+    <dependency>
+      <groupId>org.flywaydb</groupId>
+      <artifactId>flyway-database-oracle</artifactId>
+    </dependency>
+
     <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-test</artifactId>
@@ -96,12 +108,7 @@
       <scope>test</scope>
     </dependency>
     
-    <!-- Spring Test for integration testing -->
-    <dependency>
-      <groupId>org.springframework.boot</groupId>
-      <artifactId>spring-boot-starter-test</artifactId>
-      <scope>test</scope>
-    </dependency>
+    <!-- Spring Test for integration testing (removed duplicate) -->
     
     <!-- Spring Security Test -->
     <dependency>

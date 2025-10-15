@@ -1,0 +1,86 @@
+@startuml Employee Management System - User Registration Activity Diagram
+
+!theme plain
+skinparam activity {
+    BackgroundColor LightBlue
+    BorderColor DarkBlue
+}
+skinparam activityDiamond {
+    BackgroundColor LightYellow
+    BorderColor DarkOrange
+}
+
+start
+
+:User accesses registration page;
+:Display registration form;
+
+:User fills in registration details;
+note right
+  Required fields:
+  - Username
+  - Password
+  - Confirm Password
+  - Email (optional)
+end note
+
+:Validate form data;
+
+if (Form validation successful?) then (Yes)
+    :Check if username already exists;
+    
+    if (Username available?) then (Yes)
+        :Encrypt password using BCrypt;
+        :Create new User entity;
+        :Set user as enabled;
+        :Set creation timestamp;
+        
+        :Save user to database;
+        
+        if (User saved successfully?) then (Yes)
+            :Create default ROLE_USER authority;
+            :Save authority to database;
+            
+            if (Authority saved successfully?) then (Yes)
+                :Send confirmation email;
+                note right
+                  Email contains:
+                  - Welcome message
+                  - Login instructions
+                  - System information
+                end note
+                
+                :Display success message;
+                :Redirect to login page;
+            else (No)
+                :Rollback user creation;
+                :Display error message;
+                :Return to registration form;
+            endif
+        else (No)
+            :Display database error;
+            :Return to registration form;
+        endif
+    else (No)
+        :Display username already exists error;
+        :Return to registration form;
+    endif
+else (No)
+    :Display validation errors;
+    :Return to registration form;
+endif
+
+:User can now login;
+
+stop
+
+note bottom
+  Security Features:
+  - Password encryption with BCrypt
+  - Username uniqueness validation
+  - Default ROLE_USER assignment
+  - Email confirmation (optional)
+  - Transaction rollback on failure
+end note
+
+@enduml

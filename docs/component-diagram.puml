@@ -1,0 +1,115 @@
+@startuml Employee Management System - Component Diagram
+
+!theme plain
+skinparam componentStyle rectangle
+skinparam component {
+    BackgroundColor LightBlue
+    BorderColor DarkBlue
+}
+
+package "Frontend Layer" {
+    [Web Browser] as Browser
+    [API Client] as APIClient
+    [Swagger UI] as SwaggerUI
+}
+
+package "Presentation Layer" {
+    [LoginController] as LoginCtrl
+    [EmployeeController] as EmployeeCtrl
+    [SecurityConfig] as SecurityCfg
+}
+
+package "Business Layer" {
+    [EmployeeService] as EmployeeSvc
+    [UserDetailsService] as UserDetailsSvc
+}
+
+package "Data Access Layer" {
+    [UserRepository] as UserRepo
+    [EmployeeRepository] as EmployeeRepo
+    [AuthorityRepository] as AuthorityRepo
+}
+
+package "Database Layer" {
+    database "Oracle Database" as OracleDB {
+        [APP_USERS] as UsersTable
+        [APP_AUTHORITIES] as AuthoritiesTable
+        [EMPLOYEES] as EmployeesTable
+    }
+}
+
+package "Infrastructure Layer" {
+    [Spring Security] as SpringSec
+    [Spring Data JPA] as SpringJPA
+    [Hibernate] as Hibernate
+    [Logback] as Logging
+    [Docker Container] as Docker
+}
+
+package "External Systems" {
+    [Oracle Database Server] as OracleServer
+    [Docker Host] as DockerHost
+}
+
+' Frontend to Presentation Layer
+Browser --> LoginCtrl : HTTP GET/POST
+APIClient --> EmployeeCtrl : HTTP REST API
+SwaggerUI --> EmployeeCtrl : API Documentation
+
+' Presentation Layer Internal
+LoginCtrl --> SecurityCfg : Authentication
+EmployeeCtrl --> SecurityCfg : Authorization
+SecurityCfg --> SpringSec : Security Configuration
+
+' Presentation to Business Layer
+EmployeeCtrl --> EmployeeSvc : Business Logic
+SecurityCfg --> UserDetailsSvc : User Authentication
+
+' Business to Data Access Layer
+EmployeeSvc --> EmployeeRepo : Data Operations
+UserDetailsSvc --> UserRepo : User Lookup
+UserDetailsSvc --> AuthorityRepo : Authority Lookup
+
+' Data Access to Database Layer
+UserRepo --> UsersTable : CRUD Operations
+EmployeeRepo --> EmployeesTable : CRUD Operations
+AuthorityRepo --> AuthoritiesTable : CRUD Operations
+
+' Database Layer Internal
+UsersTable ||--o{ AuthoritiesTable : Foreign Key
+UsersTable ||--o{ EmployeesTable : Business Relationship
+
+' Infrastructure Layer Connections
+SpringSec --> SpringJPA : ORM Integration
+SpringJPA --> Hibernate : JPA Implementation
+Hibernate --> OracleDB : Database Connection
+Logging --> Docker : Application Logs
+
+' External System Connections
+OracleDB --> OracleServer : Database Server
+Docker --> DockerHost : Container Runtime
+
+' Security Flow
+note right of SecurityCfg
+  - HTTP Basic Auth for API
+  - Form-based Auth for Web
+  - CSRF Protection
+  - Session Management
+end note
+
+' Data Flow
+note right of EmployeeSvc
+  - Transaction Management
+  - Business Logic
+  - Data Validation
+end note
+
+' Database Schema
+note bottom of OracleDB
+  Database Tables:
+  - APP_USERS (id, username, password, enabled)
+  - APP_AUTHORITIES (id, username, authority)
+  - EMPLOYEES (employee_id, first_name, last_name, email, etc.)
+end note
+
+@enduml

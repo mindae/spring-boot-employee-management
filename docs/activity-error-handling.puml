@@ -1,0 +1,240 @@
+@startuml Employee Management System - Error Handling Activity Diagram
+
+!theme plain
+skinparam activity {
+    BackgroundColor LightPink
+    BorderColor DarkPink
+}
+skinparam activityDiamond {
+    BackgroundColor LightYellow
+    BorderColor DarkOrange
+}
+
+start
+
+:Exception occurs in application;
+
+:Exception caught by appropriate handler;
+
+if (Exception type?) then (AuthenticationException)
+    :Log authentication failure;
+    note right
+      Log details:
+      - Username attempted
+      - IP address
+      - Timestamp
+      - Exception details
+    end note
+    
+    if (Request type?) then (Web Interface)
+        :Redirect to /login?error;
+        :Display "Authentication failed" message;
+    else (API Request)
+        :Return 401 Unauthorized;
+        :Include WWW-Authenticate header;
+    endif
+
+elseif (AccessDeniedException)
+    :Log access denied attempt;
+    note right
+      Log details:
+      - User ID
+      - Requested resource
+      - User authorities
+      - Timestamp
+    end note
+    
+    if (Request type?) then (Web Interface)
+        :Redirect to /access-denied;
+        :Display "Access denied" message;
+    else (API Request)
+        :Return 403 Forbidden;
+        :Include error details;
+    endif
+
+elseif (EntityNotFoundException)
+    :Log entity not found;
+    note right
+      Log details:
+      - Entity type
+      - Entity ID
+      - User ID
+      - Request path
+    end note
+    
+    if (Request type?) then (Web Interface)
+        :Redirect to /not-found;
+        :Display "Resource not found" message;
+    else (API Request)
+        :Return 404 Not Found;
+        :Include error details;
+    endif
+
+elseif (ValidationException)
+    :Log validation error;
+    note right
+      Log details:
+      - Validation errors
+      - User input
+      - User ID
+      - Timestamp
+    end note
+    
+    if (Request type?) then (Web Interface)
+        :Return to form with errors;
+        :Display validation messages;
+    else (API Request)
+        :Return 400 Bad Request;
+        :Include validation errors;
+    endif
+
+elseif (DatabaseException)
+    :Log database error;
+    note right
+      Log details:
+      - SQL error details
+      - Database operation
+      - User ID
+      - Timestamp
+    end note
+    
+    :Check if retryable error;
+    
+    if (Retryable error?) then (Yes)
+        :Attempt retry;
+        
+        if (Retry successful?) then (Yes)
+            :Continue normal flow;
+        else (No)
+            :Log retry failure;
+            :Handle as non-retryable;
+        endif
+    else (No)
+        :Handle as non-retryable;
+    endif
+    
+    if (Request type?) then (Web Interface)
+        :Redirect to /error;
+        :Display "Database error" message;
+    else (API Request)
+        :Return 500 Internal Server Error;
+        :Include error details;
+    endif
+
+elseif (TimeoutException)
+    :Log timeout error;
+    note right
+      Log details:
+      - Operation type
+      - Timeout duration
+      - User ID
+      - Timestamp
+    end note
+    
+    if (Request type?) then (Web Interface)
+        :Redirect to /timeout;
+        :Display "Request timeout" message;
+    else (API Request)
+        :Return 408 Request Timeout;
+        :Include timeout details;
+    endif
+
+elseif (BusinessLogicException)
+    :Log business logic error;
+    note right
+      Log details:
+      - Business rule violated
+      - User ID
+      - Operation context
+      - Timestamp
+    end note
+    
+    if (Request type?) then (Web Interface)
+        :Return to form with error;
+        :Display business error message;
+    else (API Request)
+        :Return 422 Unprocessable Entity;
+        :Include business error details;
+    endif
+
+else (Unknown Exception)
+    :Log unknown error;
+    note right
+      Log details:
+      - Exception class
+      - Stack trace
+      - User ID
+      - Request details
+      - Timestamp
+    end note
+    
+    :Send error notification to administrators;
+    note right
+      Notification includes:
+      - Error severity
+      - Exception details
+      - User context
+      - System state
+    end note
+    
+    if (Request type?) then (Web Interface)
+        :Redirect to /error;
+        :Display "Internal server error" message;
+    else (API Request)
+        :Return 500 Internal Server Error;
+        :Include generic error message;
+    endif
+endif
+
+:Update error statistics;
+note right
+  Error statistics:
+  - Error count by type
+  - Error rate
+  - User error patterns
+  - System health metrics
+end note
+
+:Check error threshold;
+if (Error rate exceeds threshold?) then (Yes)
+    :Trigger alert system;
+    note right
+      Alert actions:
+      - Send email to administrators
+      - Log critical error
+      - Update monitoring dashboard
+      - Consider system shutdown
+    end note
+else (No)
+    :Continue normal operation;
+endif
+
+:Return appropriate response to user;
+
+if (Error requires user action?) then (Yes)
+    :Display user guidance;
+    note right
+      User guidance:
+      - Error explanation
+      - Suggested actions
+      - Contact information
+      - Help resources
+    end note
+else (No)
+    :Continue with application flow;
+endif
+
+stop
+
+note bottom
+  Error Handling Features:
+  - Comprehensive exception mapping
+  - Detailed error logging
+  - User-friendly error messages
+  - Administrator notifications
+  - Error statistics tracking
+  - Retry mechanisms
+  - Graceful degradation
+end note
+
+@enduml

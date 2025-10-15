@@ -1,0 +1,154 @@
+@startuml Employee Management System - Employee Operations Sequence Diagram
+
+!theme plain
+skinparam sequenceArrowThickness 2
+skinparam roundcorner 20
+skinparam maxmessagesize 60
+
+actor "Client" as C
+participant "Browser/API Client" as B
+participant "EmployeeController" as EC
+participant "EmployeeService" as ES
+participant "EmployeeRepository" as ER
+participant "Database" as DB
+participant "SecurityConfig" as SC
+
+== Get All Employees ==
+C -> B: GET /api/employees
+B -> SC: Check authentication
+activate SC
+SC -> SC: Validate Basic Auth credentials
+SC --> B: Authentication successful
+deactivate SC
+B -> EC: GET /api/employees
+activate EC
+EC -> ES: listAll()
+activate ES
+ES -> ER: findAll()
+activate ER
+ER -> DB: SELECT * FROM EMPLOYEES
+DB --> ER: List<Employee>
+deactivate ER
+ER --> ES: List<Employee>
+deactivate ES
+ES --> EC: List<Employee>
+deactivate EC
+EC --> B: 200 OK + JSON
+B --> C: Employee list
+
+== Get Employee by ID ==
+C -> B: GET /api/employees/{id}
+B -> SC: Check authentication
+activate SC
+SC --> B: Authentication successful
+deactivate SC
+B -> EC: GET /api/employees/{id}
+activate EC
+EC -> ES: getById(id)
+activate ES
+ES -> ER: findById(id)
+activate ER
+ER -> DB: SELECT * FROM EMPLOYEES WHERE EMPLOYEE_ID = ?
+DB --> ER: Optional<Employee>
+deactivate ER
+ER --> ES: Optional<Employee>
+deactivate ES
+ES --> EC: Optional<Employee>
+alt Employee Found
+    EC --> B: 200 OK + Employee JSON
+    B --> C: Employee details
+else Employee Not Found
+    EC --> B: 404 Not Found
+    B --> C: Error response
+end
+deactivate EC
+
+== Create New Employee ==
+C -> B: POST /api/employees + Employee JSON
+B -> SC: Check authentication
+activate SC
+SC --> B: Authentication successful
+deactivate SC
+B -> EC: POST /api/employees
+activate EC
+EC -> ES: create(employee)
+activate ES
+ES -> ER: save(employee)
+activate ER
+ER -> DB: INSERT INTO EMPLOYEES VALUES (...)
+DB --> ER: Employee with generated ID
+deactivate ER
+ER --> ES: Employee
+deactivate ES
+ES --> EC: Employee
+deactivate EC
+EC --> B: 201 Created + Location header
+B --> C: Created employee
+
+== Update Employee ==
+C -> B: PUT /api/employees/{id} + Employee JSON
+B -> SC: Check authentication
+activate SC
+SC --> B: Authentication successful
+deactivate SC
+B -> EC: PUT /api/employees/{id}
+activate EC
+EC -> ES: update(id, update)
+activate ES
+ES -> ER: findById(id)
+activate ER
+ER -> DB: SELECT * FROM EMPLOYEES WHERE EMPLOYEE_ID = ?
+DB --> ER: Optional<Employee>
+deactivate ER
+alt Employee Exists
+    ES -> ES: Update employee fields
+    ES -> ER: save(updatedEmployee)
+    activate ER
+    ER -> DB: UPDATE EMPLOYEES SET ... WHERE EMPLOYEE_ID = ?
+    DB --> ER: Updated Employee
+    deactivate ER
+    ER --> ES: Employee
+    ES --> EC: Optional<Employee>
+    EC --> B: 200 OK + Updated Employee
+    B --> C: Updated employee
+else Employee Not Found
+    ES --> EC: Optional.empty()
+    EC --> B: 404 Not Found
+    B --> C: Error response
+end
+deactivate ES
+deactivate EC
+
+== Delete Employee ==
+C -> B: DELETE /api/employees/{id}
+B -> SC: Check authentication
+activate SC
+SC --> B: Authentication successful
+deactivate SC
+B -> EC: DELETE /api/employees/{id}
+activate EC
+EC -> ES: delete(id)
+activate ES
+ES -> ER: existsById(id)
+activate ER
+ER -> DB: SELECT COUNT(*) FROM EMPLOYEES WHERE EMPLOYEE_ID = ?
+DB --> ER: boolean
+deactivate ER
+alt Employee Exists
+    ES -> ER: deleteById(id)
+    activate ER
+    ER -> DB: DELETE FROM EMPLOYEES WHERE EMPLOYEE_ID = ?
+    DB --> ER: void
+    deactivate ER
+    ES --> EC: true
+    EC --> B: 204 No Content
+    B --> C: Success
+else Employee Not Found
+    ES --> EC: false
+    EC --> B: 404 Not Found
+    B --> C: Error response
+end
+deactivate ES
+deactivate EC
+
+@enduml
