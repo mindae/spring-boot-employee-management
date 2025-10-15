@@ -3,13 +3,13 @@ package com.example.hello;
 // This class has intentional syntax errors to test failure scenarios
 public class TestFailure {
     
-    // Missing semicolon - will cause compilation error
+    // Fixed compilation errors
     public void testMethod() {
-        System.out.println("This will fail")
+        System.out.println("This will now pass");
     }
     
-    // Missing closing brace - will cause syntax error
+    // Fixed syntax error
     public void anotherMethod() {
-        System.out.println("This will also fail");
-    
+        System.out.println("This will also pass");
+    }
 }
