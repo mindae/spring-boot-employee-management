@@ -153,20 +153,12 @@ jobs:
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v3
 
-    - name: Login to Docker Hub
-      uses: docker/login-action@v3
-      with:
-        username: ${{ secrets.DOCKER_USERNAME }}
-        password: ${{ secrets.DOCKER_PASSWORD }}
-
-    - name: Build and push Docker image
+    - name: Build Docker image (local only)
       uses: docker/build-push-action@v5
       with:
         context: .
-        push: true
-        tags: |
-          mindae/spring-boot-employee-management:latest
-          mindae/spring-boot-employee-management:${{ github.sha }}
+        push: false
+        tags: spring-boot-employee-management:latest
         cache-from: type=gha
         cache-to: type=gha,mode=max
 
