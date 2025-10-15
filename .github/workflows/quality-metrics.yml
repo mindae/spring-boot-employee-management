@@ -55,7 +55,7 @@ jobs:
         echo "- Test Coverage: Available in CI/CD pipeline" >> quality-report.md
 
     - name: Upload quality artifacts
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       if: always()
       with:
         name: quality-metrics
@@ -96,7 +96,7 @@ jobs:
         echo "- Maintainability Index: To be analyzed by SonarQube" >> technical-debt.md
 
     - name: Upload technical debt report
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: technical-debt-analysis
         path: technical-debt.md

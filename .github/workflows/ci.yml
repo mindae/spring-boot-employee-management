@@ -75,14 +75,14 @@ jobs:
         SPRING_DATASOURCE_DRIVER_CLASS_NAME: oracle.jdbc.OracleDriver
 
     - name: Upload test results
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       if: always()
       with:
         name: test-results
         path: target/surefire-reports/
 
     - name: Upload build artifacts
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: build-artifacts
         path: target/*.jar
@@ -114,7 +114,7 @@ jobs:
       continue-on-error: true
 
     - name: Upload security scan results
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       if: always()
       with:
         name: security-scan-results
@@ -152,7 +152,7 @@ jobs:
       continue-on-error: true
 
     - name: Upload code quality results
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       if: always()
       with:
         name: code-quality-results
