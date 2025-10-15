@@ -1,6 +1,27 @@
 # 🚀 Spring Boot Employee Management System
 
+[![CI/CD Pipeline](https://github.com/mindae/spring-boot-employee-management/actions/workflows/ci.yml/badge.svg)](https://github.com/mindae/spring-boot-employee-management/actions/workflows/ci.yml)
+[![Docker Build](https://github.com/mindae/spring-boot-employee-management/actions/workflows/docker-build.yml/badge.svg)](https://github.com/mindae/spring-boot-employee-management/actions/workflows/docker-build.yml)
+[![Security Scan](https://github.com/mindae/spring-boot-employee-management/actions/workflows/security.yml/badge.svg)](https://github.com/mindae/spring-boot-employee-management/actions/workflows/security.yml)
+[![Release](https://github.com/mindae/spring-boot-employee-management/actions/workflows/release.yml/badge.svg)](https://github.com/mindae/spring-boot-employee-management/actions/workflows/release.yml)
+[![codecov](https://codecov.io/gh/mindae/spring-boot-employee-management/branch/master/graph/badge.svg)](https://codecov.io/gh/mindae/spring-boot-employee-management)
+[![Java](https://img.shields.io/badge/Java-17-orange.svg)](https://openjdk.java.net/projects/jdk/17/)
+[![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.3.4-brightgreen.svg)](https://spring.io/projects/spring-boot)
+[![Maven](https://img.shields.io/badge/Maven-3.6+-blue.svg)](https://maven.apache.org/)
+[![Docker](https://img.shields.io/badge/Docker-Enabled-2496ED.svg)](https://www.docker.com/)
+[![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+
 A comprehensive Spring Boot application with employee management, authentication, Docker support, and comprehensive testing frameworks.
+
+## 📊 Project Status
+
+| Status | Description |
+|--------|-------------|
+| 🟢 **Build** | All builds passing |
+| 🟢 **Tests** | Comprehensive test coverage |
+| 🟢 **Security** | Regular security scans |
+| 🟢 **Quality** | Code quality checks enabled |
+| 🟢 **Docker** | Containerized deployment ready |
 
 ## ✨ Features
 
