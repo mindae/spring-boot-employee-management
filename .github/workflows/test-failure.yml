@@ -1,0 +1,20 @@
+name: Test Failure Scenario
+
+on:
+  workflow_dispatch:  # Manual trigger only
+
+jobs:
+  test-failure:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Deliberate failure for testing
+      run: |
+        echo "This step will fail to test badge behavior"
+        exit 1  # This will cause the workflow to fail
+    
+    - name: This step won't run
+      run: echo "This won't execute due to previous failure"

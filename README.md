@@ -17,11 +17,11 @@ A comprehensive Spring Boot application with employee management, authentication
 
 | Status | Description |
 |--------|-------------|
-| 🟢 **Build** | All builds passing |
-| 🟢 **Tests** | Comprehensive test coverage |
-| 🟢 **Security** | Regular security scans |
-| 🟢 **Quality** | Code quality checks enabled |
-| 🟢 **Docker** | Containerized deployment ready |
+| ![Build Status](https://img.shields.io/github/actions/workflow/status/mindae/spring-boot-employee-management/ci.yml?branch=master&label=Build) | All builds passing |
+| ![Test Status](https://img.shields.io/github/actions/workflow/status/mindae/spring-boot-employee-management/ci.yml?branch=master&label=Tests) | Comprehensive test coverage |
+| ![Security Status](https://img.shields.io/github/actions/workflow/status/mindae/spring-boot-employee-management/security.yml?branch=master&label=Security) | Regular security scans |
+| ![Quality Status](https://img.shields.io/github/actions/workflow/status/mindae/spring-boot-employee-management/quality-metrics.yml?branch=master&label=Quality) | Code quality checks enabled |
+| ![Docker Status](https://img.shields.io/github/actions/workflow/status/mindae/spring-boot-employee-management/docker-build.yml?branch=master&label=Docker) | Containerized deployment ready |
 
 ## ✨ Features
 
